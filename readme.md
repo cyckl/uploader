@@ -33,3 +33,10 @@ Usage of uploader:
   -u string
     	Set a new auth username
 ```
+
+## Todo
+* Add the random three word filename thing
+* Multi-user support
+* Auto-deletion
+* Domain-name / hostname support in HTTP response
+* Dedicated web interface with auth
