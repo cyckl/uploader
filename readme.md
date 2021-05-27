@@ -40,3 +40,4 @@ Usage of uploader:
 * Auto-deletion
 * Domain-name / hostname support in HTTP response
 * Dedicated web interface with auth
+* Add runit service
