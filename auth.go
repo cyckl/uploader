@@ -136,5 +136,5 @@ func setSecret(s string) {
 // This is probably a pretty important bit
 func pwdCheck(p, h string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(h), []byte(p))
-    return err == nil
+	return err == nil
 }
