@@ -38,6 +38,5 @@ Usage of uploader:
 * Add the random three word filename thing
 * Multi-user support
 * Auto-deletion
-* Domain-name / hostname support in HTTP response
 * Dedicated web interface with auth
 * Add runit service

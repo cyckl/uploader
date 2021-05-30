@@ -21,19 +21,11 @@ type AuthFile struct {
 	Secret	string
 }
 
-// Authenticate!
 func auth(w http.ResponseWriter, r *http.Request) error {
-	// Read auth file
-	data, err := ioutil.ReadFile("./auth.json")
+	// Read in data from auth file
+	a, err := readAuth("./auth.json")
 	if err != nil {
-		return errors.New("failed to open auth file")
-	}
-	
-	// Link JSON data slice to auth struct
-	var auth AuthFile
-	err = json.Unmarshal(data, &auth)
-	if err != nil {
-		return errors.New(fmt.Sprintf("could not unmarshal JSON data: %v\n", err))
+		return errors.New(fmt.Sprintf("could not read from auth file: %v\n", err))
 	}
 
 	u, s, ok := r.BasicAuth()
@@ -44,11 +36,11 @@ func auth(w http.ResponseWriter, r *http.Request) error {
 	}
 	
 	// Check credentials
-	if u != auth.User {
+	if u != a.User {
 		w.WriteHeader(401)
 		return errors.New("incorrect credentials")
 	}
-	if pwdCheck(s, auth.Secret) != true {
+	if pwdCheck(s, a.Secret) != true {
 		w.WriteHeader(401)
 		return errors.New("incorrect credentials")
 	}
@@ -58,35 +50,20 @@ func auth(w http.ResponseWriter, r *http.Request) error {
 
 // Set a new user in the config
 func setUser(u string) {
-	// Read auth file
-	data, err := ioutil.ReadFile("./auth.json")
+	// Read in data from auth file
+	a, err := readAuth("./auth.json")
 	if err != nil {
-		log.Printf("[Auth] Failed to open file: %v\n", err)
-		return
-	}
-	
-	// Link JSON data slice to Auth struct
-	var auth AuthFile
-	err = json.Unmarshal(data, &auth)
-	if err != nil {
-		log.Printf("[Auth] Could not unmarshal JSON data: %v\n", err)
+		log.Printf("[Auth] Failed to read in auth data: %v\n", err)
 		return
 	}
 	
 	// Set new user in field
-	auth.User = string(u)
+	a.User = string(u)
 	
-	// Re-encode in JSON
-	authNew, err := json.Marshal(auth)
+	// save data to auth file
+	err = saveAuth(a, "./auth.json")
 	if err != nil {
-		log.Printf("[Auth] Could not marshal JSON data: %v\n", err)
-		return
-	}
-	
-	// Save to file
-	err = ioutil.WriteFile("./auth.json", authNew, 0644)
-	if err != nil {
-		log.Printf("[Auth] Could not write to file: %v\n", err)
+		log.Printf("[Auth] Failed to write auth data: %v\n", err)
 		return
 	}
 }
@@ -94,41 +71,26 @@ func setUser(u string) {
 // Set a new secret in the config
 func setSecret(s string) {
 	// Hash the new secret
-	sBytes, err := bcrypt.GenerateFromPassword([]byte(s), cost)
+	bs, err := bcrypt.GenerateFromPassword([]byte(s), cost)
 	if err != nil {
 		log.Printf("[Auth] Could not hash new secret: %v\n", err)
 		return
 	}
 	
-	// Read auth file
-	data, err := ioutil.ReadFile("auth.json")
+	// Read in data from auth file
+	a, err := readAuth("./auth.json")
 	if err != nil {
-		log.Printf("[Auth] Failed to open file: %v\n", err)
-		return
-	}
-	
-	// Link JSON data slice to Auth struct
-	var auth AuthFile
-	err = json.Unmarshal(data, &auth)
-	if err != nil {
-		log.Printf("[Auth] Could not unmarshal JSON data: %v\n", err)
+		log.Printf("[Auth] Failed to read in auth data: %v\n", err)
 		return
 	}
 	
 	// Set new secret in field
-	auth.Secret = string(sBytes)
+	a.Secret = string(bs)
 	
-	// Re-encode in JSON
-	authNew, err := json.Marshal(auth)
+	// save data to auth file
+	err = saveAuth(a, "./auth.json")
 	if err != nil {
-		log.Printf("[Auth] Could not marshal JSON data: %v\n", err)
-		return
-	}
-	
-	// Save to file
-	err = ioutil.WriteFile("./auth.json", authNew, 0644)
-	if err != nil {
-		log.Printf("[Auth] Could not write to file: %v\n", err)
+		log.Printf("[Auth] Failed to write auth data: %v\n", err)
 		return
 	}
 }
@@ -137,4 +99,36 @@ func setSecret(s string) {
 func pwdCheck(p, h string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(h), []byte(p))
 	return err == nil
+}
+
+func readAuth(path string) (auth AuthFile, err error) {
+	// Read auth file
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		return auth, errors.New("failed to open file")
+	}
+	
+	// Link JSON data slice to Auth struct
+	err = json.Unmarshal(data, &auth)
+	if err != nil {
+		return auth, errors.New(fmt.Sprintf("could not unmarshal JSON data: %v\n", err))
+	}
+	
+	return auth, nil
+}
+
+func saveAuth(auth AuthFile, path string) error {
+	// Re-encode in JSON
+	json, err := json.Marshal(auth)
+	if err != nil {
+		return errors.New(fmt.Sprintf("could not re-marshal JSON data: %v\n", err))
+	}
+	
+	// Save to file
+	err = ioutil.WriteFile(path, json, 0644)
+	if err != nil {
+		return errors.New(fmt.Sprintf("could not write to file: %v\n", err))
+	}
+	
+	return nil
 }

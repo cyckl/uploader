@@ -20,7 +20,8 @@ var (
 	// Set up flags and their defaults
 	size = flag.Int64("m", 10, "The max file size in MB")
 	port = flag.String("p", "8080", "The port to bind to")
-	dir = flag.String("d", "files/", "Location to save files in")
+	dir = flag.String("d", "", "Location to save files in")
+	host = flag.String("w", "", "Public-facing URL for server")
 	
 	// Handle setting new creds but default to empty
 	newUser = flag.String("u", "", "Set a new auth username")
@@ -43,7 +44,7 @@ func main() {
 	http.HandleFunc("/upload", upload)
 	
 	// Bind to port
-	log.Printf("[Status] Attempting bind to port %v", *port)
+	log.Printf("[Status] Attempting bind to port %v\n", *port)
 	err := http.ListenAndServe(":" + *port, nil)
 	if err != nil {
 		log.Fatalln(err)
@@ -52,26 +53,26 @@ func main() {
 
 // Upload and save file
 func upload(w http.ResponseWriter, r *http.Request) {
-	log.Println("[Upload] Attempting new upload from", r.RemoteAddr)
+	log.Printf("Attempting new upload from %v\n", r.RemoteAddr)
 	
 	// Check authentication
 	err := auth(w, r)
 	if err != nil {
-		log.Println("[Error] Authentication failed:", err)
+		log.Printf("[Error] Authentication failed: %v\n", err)
 		return
 	}
 	
 	// Parse form with max file size in MB
 	err = r.ParseMultipartForm(*size << 20)
 	if err != nil {
-		log.Println("[Error] Failed to parse multipart form:", err)
+		log.Printf("[Error] Failed to parse multipart form: %v\n", err)
 		return
 	}
 	
 	// Return file data for the HTML tag "data"
 	file, handler, err := r.FormFile("data")
 	if err != nil {
-		log.Println("[Error] Failed to get file from uploader:", err)
+		log.Printf("[Error] Failed to get file from uploader: %v\n", err)
 		return
 	}
 	defer file.Close()
@@ -79,7 +80,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 	// Read upload to bytestream
 	data, err := ioutil.ReadAll(file)
 	if err != nil {
-		log.Println("[Error] Failed to get raw byte data from upload:", err)
+		log.Printf("[Error] Failed to get raw byte data from upload: %v\n", err)
 		return
 	}
 	
@@ -90,15 +91,15 @@ func upload(w http.ResponseWriter, r *http.Request) {
 	// Save that bytestream to a file with 644 perms
 	err = ioutil.WriteFile(loc, data, 0644)
 	if err != nil {
-		log.Println("[Error] Failed to save raw byte data as file:", err)
+		log.Printf("[Error] Failed to save raw byte data as file: %v\n", err)
 		return
 	}
 	
 	// Log successful upload
-	log.Printf("[Upload] Uploaded %v (%v bytes) from %v\n", handler.Filename, handler.Size, r.RemoteAddr)
+	log.Printf("Saved %v (%v bytes) from %v\n", name, handler.Size, r.RemoteAddr)
 	
-	// Send back response with URL
-	fmt.Fprintf(w, r.URL.Host + name)
+	// Send back response with URL + file name
+	fmt.Fprintln(w, *host + name)
 }
 
 func nameGen(orig string, l int) string {
