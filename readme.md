@@ -9,9 +9,10 @@
 * Written in Go? (I guess)
 
 ## Setting up
-1. `./uploader -u <username> -s <secret>`
-2. `./uploader -w <domain> -d <path to webroot>`
-	* I recommend running this step as a service
+```
+$ ./uploader -u <username> -s <secret>
+$ ./uploader -w <domain> -d <path to webroot>
+```
 
 ## How to upload
 ```
