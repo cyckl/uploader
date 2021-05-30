@@ -39,6 +39,7 @@ Usage of uploader:
 ## Todo
 * Add the random three word filename thing
 * Multi-user support
+	* How should I implement this without adding a whole bunch of code in order to deal with user management
 * Auto-deletion
 * Dedicated web interface with auth
 * Add runit service
