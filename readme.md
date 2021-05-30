@@ -9,17 +9,18 @@
 * Only one user unfortunately
 * Written in Go? (I guess)
 
-## How to use
-```
-curl -u user:pass -F "data=@example.txt" http://127.0.0.1:8080/upload 
-```
-
-## Setting new credentials
-The default credentials are `username:password`. I recommend changing them.
+## Setting up
 1. `./uploader -u <username>`
 2. `./uploader -s <secret>`
+3. `./uploader -w <domain> -d <path to webroot>`
+	* I recommend running this step as a service
 
-## Help dialog
+## How to upload
+```
+curl -u username:secret -F "data=@foo.txt" http://127.0.0.1:8080/upload 
+```
+
+## Accepted flags
 ```
 Usage of uploader:
   -d string
