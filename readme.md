@@ -22,6 +22,7 @@ $ curl -u username:secret -F "data=@foo.txt" http://127.0.0.1:8080/upload
 ## Accepted flags
 ```
 Usage of uploader:
+  -a	Disable authentication
   -d string
     	Location to save files in
   -m int
