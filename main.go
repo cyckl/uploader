@@ -35,16 +35,18 @@ func main() {
 	// Check if there are new credentials being set
 	if *newUser != "" {
 		setUser(*newUser)
+		log.Printf("Setting new username: %v\n", *newUser)
 	}
 	if *newSecret != "" {
 		setSecret(*newSecret)
+		log.Printf("Setting new user secret\n")
 	}
 	
 	// Delegate URL endpoint and call function
 	http.HandleFunc("/upload", upload)
 	
 	// Bind to port
-	log.Printf("[Status] Attempting bind to port %v\n", *port)
+	log.Printf("Attempting bind to port %v\n", *port)
 	err := http.ListenAndServe(":" + *port, nil)
 	if err != nil {
 		log.Fatalln(err)
