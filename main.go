@@ -6,6 +6,8 @@
 package main
 
 import (
+	"errors"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -87,7 +89,12 @@ func upload(w http.ResponseWriter, r *http.Request) {
 	}
 	
 	// Set save location
-	name := nameGen(handler.Filename, 5)
+	name, err := nameGen(handler.Filename)
+	if err != nil {
+		log.Printf("[Error] Random name generation failed: %v\n", err)
+		return
+	}
+	
 	loc := *dir + name
 	
 	// Save that bytestream to a file with 644 perms
@@ -104,25 +111,36 @@ func upload(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, *host + name)
 }
 
-func nameGen(orig string, l int) string {
-	// Generate random file name
-	rand.Seed(time.Now().UnixNano())
-	var char = []rune("abcdefghijklmnopqrstuvwxyz0123456789")
-	gen := make([]rune, l)
-	for i := range gen {
-		gen[i] = char[rand.Intn(len(char))]
+func nameGen(file string) (string, error) {
+	// Read word file
+	data, err := ioutil.ReadFile("./words.json")
+	if err != nil {
+		return "", errors.New("failed to open word file")
 	}
+	
+	// Link JSON data slice to word slice
+	var words []string
+	err = json.Unmarshal(data, &words)
+	if err != nil {
+		return "", errors.New(fmt.Sprintf("could not unmarshal JSON data: %v\n", err))
+	}
+
+	// Shuffle words in word list
+	rand.Seed(time.Now().UnixNano())
+	rand.Shuffle(len(words), func(i, j int) { words[i], words[j] = words[j], words[i] })
+	// Get first three entries of shuffled array
+	gen := words[0] + words[1] + words[2]
 	
 	// Filename "edge cases" (they're common but just *special*)
 	var name string
-	if strings.Contains(orig, strings.ToLower(".tar.")) {
-		name = string(gen) + ".tar" + path.Ext(orig)
-	} else if path.Ext(orig) == "" {
+	if strings.Contains(file, strings.ToLower(".tar.")) {
+		name = string(gen) + ".tar" + path.Ext(file)
+	} else if path.Ext(file) == "" {
 		name = string(gen) + ".bin"
 	} else {
-		name = string(gen) + path.Ext(orig)
+		name = string(gen) + path.Ext(file)
 	}
 	
 	// Return the new path
-	return name
+	return name, nil
 }
