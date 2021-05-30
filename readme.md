@@ -9,9 +9,8 @@
 * Written in Go? (I guess)
 
 ## Setting up
-1. `./uploader -u <username>`
-2. `./uploader -s <secret>`
-3. `./uploader -w <domain> -d <path to webroot>`
+1. `./uploader -u <username> -s <secret>`
+2. `./uploader -w <domain> -d <path to webroot>`
 	* I recommend running this step as a service
 
 ## How to upload
