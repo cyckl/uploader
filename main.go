@@ -46,7 +46,7 @@ func main() {
 	http.HandleFunc("/upload", upload)
 	
 	// Bind to port
-	log.Printf("Attempting bind to port %v\n", *port)
+	log.Printf("Listening on port %v\n", *port)
 	err := http.ListenAndServe(":" + *port, nil)
 	if err != nil {
 		log.Fatalln(err)
