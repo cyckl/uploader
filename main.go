@@ -75,7 +75,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 	}
 	
 	// Return file data for the HTML tag "data"
-	file, handler, err := r.FormFile("data")
+	file, header, err := r.FormFile("data")
 	if err != nil {
 		log.Printf("[Error] Failed to get file from uploader: %v\n", err)
 		return
@@ -90,14 +90,14 @@ func upload(w http.ResponseWriter, r *http.Request) {
 	}
 	
 	// Save to file
-	name, err := save(data, handler)
+	name, err := save(data, header)
 	if err != nil {
 		log.Printf("[Error] Failed to save byte data to file: %v\n", err)
 		return
 	}
 	
 	// Log successful upload
-	log.Printf("Saved %v (%v bytes) from %v\n", name, handler.Size, r.RemoteAddr)
+	log.Printf("Saved %v (%v bytes) from %v\n", name, header.Size, r.RemoteAddr)
 	
 	// Send back response with URL + file name
 	fmt.Fprintln(w, *host + name)
