@@ -25,6 +25,7 @@ var (
 	port = flag.String("p", "8080", "The port to bind to")
 	dir = flag.String("d", "", "Location to save files in")
 	host = flag.String("w", "", "Public-facing URL for server")
+	sec = flag.Bool("a", false, "Disable authentication")
 	
 	// Handle setting new creds but default to empty
 	newUser = flag.String("u", "", "Set a new auth username")
@@ -61,14 +62,16 @@ func upload(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Attempting new upload from %v\n", r.RemoteAddr)
 	
 	// Check authentication
-	err := auth(w, r)
-	if err != nil {
-		log.Printf("[Error] Authentication failed: %v\n", err)
-		return
+	if *sec != true {
+		err := auth(w, r)
+		if err != nil {
+			log.Printf("[Error] Authentication failed: %v\n", err)
+			return
+		}
 	}
 	
 	// Parse form with max file size in MB
-	err = r.ParseMultipartForm(*size << 20)
+	err := r.ParseMultipartForm(*size << 20)
 	if err != nil {
 		log.Printf("[Error] Failed to parse multipart form: %v\n", err)
 		return
