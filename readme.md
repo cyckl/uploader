@@ -11,7 +11,7 @@
 
 ## How to use
 ```
-curl -u username:password -F "data=@example.text" http://127.0.0.1:8080/upload 
+curl -u user:pass -F "data=@example.txt" http://127.0.0.1:8080/upload 
 ```
 
 ## Setting new credentials
@@ -23,7 +23,7 @@ The default credentials are `username:password`. I recommend changing them.
 ```
 Usage of uploader:
   -d string
-    	Location to save files in (default "files/")
+    	Location to save files in
   -m int
     	The max file size in MB (default 10)
   -p string
@@ -32,6 +32,8 @@ Usage of uploader:
     	Set a new auth secret
   -u string
     	Set a new auth username
+  -w string
+    	Public-facing URL for server
 ```
 
 ## Todo
