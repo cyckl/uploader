@@ -25,6 +25,7 @@ func auth(w http.ResponseWriter, r *http.Request) error {
 	// Read in data from auth file
 	a, err := readAuth("./auth.json")
 	if err != nil {
+		fmt.Fprintln(w, "Server-side auth failure")
 		return errors.New(fmt.Sprintf("could not read from auth file: %v\n", err))
 	}
 
@@ -32,16 +33,19 @@ func auth(w http.ResponseWriter, r *http.Request) error {
 	// Check if auth in header was formed correctly
 	if !ok {
 		w.WriteHeader(401)
+		fmt.Fprintln(w, "Malformed request")
 		return errors.New("malformed")
 	}
 	
 	// Check credentials
 	if u != a.User {
 		w.WriteHeader(401)
+		fmt.Fprintln(w, "Incorrect credentials")
 		return errors.New("incorrect credentials")
 	}
 	if pwdCheck(s, a.Secret) != true {
 		w.WriteHeader(401)
+		fmt.Fprintln(w, "Incorrect credentials")
 		return errors.New("incorrect credentials")
 	}
 	
