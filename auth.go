@@ -118,7 +118,7 @@ func readAuth(path string) (auth AuthFile, err error) {
 
 func saveAuth(auth AuthFile, path string) error {
 	// Re-encode in JSON
-	json, err := json.Marshal(auth)
+	json, err := json.MarshalIndent(auth, "", "\t")
 	if err != nil {
 		return errors.New(fmt.Sprintf("could not re-marshal JSON data: %v\n", err))
 	}
