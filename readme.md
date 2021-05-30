@@ -16,7 +16,7 @@ $ ./uploader -w <domain> -d <path to webroot>
 
 ## How to upload
 ```
-curl -u username:secret -F "data=@foo.txt" http://127.0.0.1:8080/upload 
+$ curl -u username:secret -F "data=@foo.txt" http://127.0.0.1:8080/upload 
 ```
 
 ## Accepted flags
