@@ -6,7 +6,6 @@
 * Random file name generator
 * Can specify port, save location, and max file size
 * bcrypt for authentication secret
-* Only one user unfortunately
 * Written in Go? (I guess)
 
 ## Setting up
