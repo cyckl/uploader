@@ -13,6 +13,7 @@ import (
 	"io/ioutil"
 	"log"
 	"math/rand"
+	"mime/multipart"
 	"net/http"
 	"path"
 	"strings"
@@ -55,7 +56,7 @@ func main() {
 	}
 }
 
-// Upload and save file
+// Upload to server
 func upload(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Attempting new upload from %v\n", r.RemoteAddr)
 	
@@ -88,19 +89,10 @@ func upload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	// Set save location
-	name, err := nameGen(handler.Filename)
+	// Save to file
+	name, err := save(data, handler)
 	if err != nil {
-		log.Printf("[Error] Random name generation failed: %v\n", err)
-		return
-	}
-	
-	loc := *dir + name
-	
-	// Save that bytestream to a file with 644 perms
-	err = ioutil.WriteFile(loc, data, 0644)
-	if err != nil {
-		log.Printf("[Error] Failed to save raw byte data as file: %v\n", err)
+		log.Printf("[Error] Failed to save byte data to file: %v\n", err)
 		return
 	}
 	
@@ -109,6 +101,26 @@ func upload(w http.ResponseWriter, r *http.Request) {
 	
 	// Send back response with URL + file name
 	fmt.Fprintln(w, *host + name)
+}
+
+// Yes
+func save(data []byte, header *multipart.FileHeader) (string, error) {
+	// Generate name
+	name, err := nameGen(header.Filename)
+	if err != nil {
+		return "", errors.New(fmt.Sprintf("random name generation failed: %v\n", err))
+	}
+	
+	// Set save location
+	loc := *dir + name
+	
+	// Save that bytestream to a file with 644 perms
+	err = ioutil.WriteFile(loc, data, 0644)
+	if err != nil {
+		return "", errors.New(fmt.Sprintf("failed to save raw byte data as file: %v\n", err))
+	}
+	
+	return name, nil
 }
 
 func nameGen(file string) (string, error) {
@@ -141,6 +153,5 @@ func nameGen(file string) (string, error) {
 		name = string(gen) + path.Ext(file)
 	}
 	
-	// Return the new path
 	return name, nil
 }
