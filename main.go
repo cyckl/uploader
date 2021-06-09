@@ -48,7 +48,7 @@ func main() {
 	}
 	
 	// Delegate URL endpoint and call function
-	http.HandleFunc("/upload", upload)
+	http.HandleFunc("/", upload)
 	
 	// Bind to port
 	log.Printf("Listening on port %v\n", *port)
