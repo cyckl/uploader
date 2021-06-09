@@ -26,6 +26,7 @@ var (
 	dir = flag.String("d", "", "Location to save files in")
 	host = flag.String("w", "", "Public-facing URL for server")
 	sec = flag.Bool("a", false, "Disable authentication")
+	fName = flag.Bool("f", false, "Use original filename")
 	
 	// Handle setting new creds but default to empty
 	newUser = flag.String("u", "", "Set a new auth username")
@@ -108,10 +109,16 @@ func upload(w http.ResponseWriter, r *http.Request) {
 
 // Yes
 func save(data []byte, header *multipart.FileHeader) (string, error) {
-	// Generate name
-	name, err := nameGen(header.Filename)
-	if err != nil {
-		return "", errors.New(fmt.Sprintf("random name generation failed: %v\n", err))
+	var name string
+	var err error
+	// Set orig filename or rand filename
+	if *fName == true {
+		name = header.Filename
+	} else {
+		name, err = nameGen(header.Filename)
+		if err != nil {
+			return "", errors.New(fmt.Sprintf("random name generation failed: %v\n", err))
+		}
 	}
 	
 	// Set save location
