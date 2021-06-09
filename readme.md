@@ -25,6 +25,7 @@ Usage of uploader:
   -a	Disable authentication
   -d string
     	Location to save files in
+  -f	Save as original filename
   -m int
     	The max file size in MB (default 10)
   -p string
